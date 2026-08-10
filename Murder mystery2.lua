@@ -1,4 +1,6 @@
+-- ==========================================================
 -- Roblox MM2 Modern UI Script (Fixed WalkSpeed / PID Hack, Tabs, ESP, Aimbot, Flight, Fling, Non-TP Fast Farm, Noclip & Infinite Jump)
+-- ==========================================================
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -321,18 +323,23 @@ createToggle(tab2Page, "Fling Sheriff", getgenv().flingSheriffEnabled, function(
 end)
 
 -- Populate Tab 3 (Разработчики)
-local DevLabel = Instance.new("TextLabel")
-DevLabel.Size = UDim2.new(1, 0, 0, 40)
-DevLabel.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
-DevLabel.TextColor3 = Color3.fromRGB(114, 137, 218)
-DevLabel.TextSize = 14
-DevLabel.Font = Enum.Font.GothamBold
-DevLabel.Text = "sanonaprivate"
-DevLabel.Parent = tab3Page
+local function createDevLabel(devName)
+    local DevLabel = Instance.new("TextLabel")
+    DevLabel.Size = UDim2.new(1, 0, 0, 40)
+    DevLabel.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
+    DevLabel.TextColor3 = Color3.fromRGB(114, 137, 218)
+    DevLabel.TextSize = 14
+    DevLabel.Font = Enum.Font.GothamBold
+    DevLabel.Text = devName
+    DevLabel.Parent = tab3Page
 
-local DevCorner = Instance.new("UICorner")
-DevCorner.CornerRadius = UDim.new(0, 6)
-DevCorner.Parent = DevLabel
+    local DevCorner = Instance.new("UICorner")
+    DevCorner.CornerRadius = UDim.new(0, 6)
+    DevCorner.Parent = DevLabel
+end
+
+createDevLabel("sanonaprivate")
+createDevLabel("Darynlox32")
 
 ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
