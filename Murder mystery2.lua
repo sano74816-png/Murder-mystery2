@@ -1,18 +1,19 @@
 -- ==========================================================
--- MM2 Modern UI Script (Target Player Fling Added)
+-- MM2 Modern UI Script (Added Wallbang for Sheriff)
 -- ==========================================================
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 getgenv().espEnabled = getgenv().espEnabled or false
+getgenv().sheriffAimbotEnabled = getgenv().sheriffAimbotEnabled or false
+getgenv().sheriffWallbangEnabled = getgenv().sheriffWallbangEnabled or false
 getgenv().flightEnabled = getgenv().flightEnabled or false
-getgenv().aimbotEnabled = getgenv().aimbotEnabled or false
-getgenv().murdererAimbotEnabled = getgenv().murdererAimbotEnabled or false
 getgenv().killAllMurdererEnabled = getgenv().killAllMurdererEnabled or false
 getgenv().flingMurdererEnabled = getgenv().flingMurdererEnabled or false
 getgenv().flingSheriffEnabled = getgenv().flingSheriffEnabled or false
@@ -27,6 +28,18 @@ getgenv().swimWalkEnabled = getgenv().swimWalkEnabled or false
 getgenv().customSpeed = getgenv().customSpeed or 32
 getgenv().walkSpeedEnabled = getgenv().walkSpeedEnabled or false
 getgenv().walkSpeedValue = getgenv().walkSpeedValue or 24
+
+-- Bunny Hop variables
+getgenv().bhopEnabled = getgenv().bhopEnabled or false
+getgenv().bhopSpeed = getgenv().bhopSpeed or 24
+
+-- Skin Changer variables
+getgenv().skinChangerActive = getgenv().skinChangerActive or false
+getgenv().selectedKnifeMesh = getgenv().selectedKnifeMesh or ""
+getgenv().selectedGunMesh = getgenv().selectedGunMesh or ""
+
+-- Bullet Tracers variable
+getgenv().bulletTracersEnabled = getgenv().bulletTracersEnabled or false
 
 if CoreGui:FindFirstChild("MM2ModernPanel") then
     CoreGui.MM2ModernPanel:Destroy()
@@ -93,13 +106,13 @@ HeaderCover.BorderSizePixel = 0
 HeaderCover.Parent = Header
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 220, 1, 0)
+Title.Size = UDim2.new(0, 260, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
 Title.Font = Enum.Font.GothamBold
-Title.Text = "MM2 Hub <font color='#7289da'>v3.2 TargetFling</font>"
+Title.Text = "MM2 Hub <font color='#7289da'>v4.1 Wallbang</font>"
 Title.RichText = true
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
@@ -133,10 +146,10 @@ local Pages = {}
 
 local function createTab(name, order)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, 0, 0, 32)
+    TabButton.Size = UDim2.new(1, 0, 0, 28)
     TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
     TabButton.TextColor3 = Color3.fromRGB(160, 160, 180)
-    TabButton.TextSize = 12
+    TabButton.TextSize = 11
     TabButton.Font = Enum.Font.GothamSemibold
     TabButton.Text = name
     TabButton.LayoutOrder = order
@@ -175,7 +188,8 @@ end
 local tab1Btn, tab1Page = createTab("Главная", 1)
 local tab2Btn, tab2Page = createTab("Фарм & ТП", 2)
 local tab3Btn, tab3Page = createTab("Игроки", 3)
-local tab4Btn, tab4Page = createTab("Авторы", 4)
+local tab4Btn, tab4Page = createTab("Скинченджер", 4)
+local tab5Btn, tab5Page = createTab("Авторы", 5)
 
 local function switchTab(selectedTab)
     for _, tab in ipairs(Tabs) do
@@ -193,6 +207,7 @@ tab1Btn.MouseButton1Click:Connect(function() switchTab(tab1Page) end)
 tab2Btn.MouseButton1Click:Connect(function() switchTab(tab2Page) end)
 tab3Btn.MouseButton1Click:Connect(function() switchTab(tab3Page) end)
 tab4Btn.MouseButton1Click:Connect(function() switchTab(tab4Page) end)
+tab5Btn.MouseButton1Click:Connect(function() switchTab(tab5Page) end)
 switchTab(tab1Page)
 
 local function createToggle(parent, text, initialState, callback)
@@ -241,22 +256,22 @@ local function createSpeedInput(parent, text, defaultVal, callback)
     Corner.Parent = Frame
 
     local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(0.6, 0, 1, 0)
+    Label.Size = UDim2.new(0.5, 0, 1, 0)
     Label.Position = UDim2.new(0, 10, 0, 0)
     Label.BackgroundTransparency = 1
     Label.TextColor3 = Color3.fromRGB(220, 220, 240)
-    Label.TextSize = 13
+    Label.TextSize = 12
     Label.Font = Enum.Font.GothamMedium
     Label.Text = text
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = Frame
 
     local TextBox = Instance.new("TextBox")
-    TextBox.Size = UDim2.new(0.3, 0, 0, 26)
-    TextBox.Position = UDim2.new(0.67, 0, 0.5, -13)
+    TextBox.Size = UDim2.new(0.4, 0, 0, 26)
+    TextBox.Position = UDim2.new(0.57, 0, 0.5, -13)
     TextBox.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
     TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TextBox.TextSize = 13
+    TextBox.TextSize = 11
     TextBox.Font = Enum.Font.GothamBold
     TextBox.Text = tostring(defaultVal)
     TextBox.Parent = Frame
@@ -266,24 +281,22 @@ local function createSpeedInput(parent, text, defaultVal, callback)
     BoxCorner.Parent = TextBox
 
     TextBox.FocusLost:Connect(function()
-        local num = tonumber(TextBox.Text)
-        if num then
-            callback(num)
-        else
-            TextBox.Text = tostring(defaultVal)
-        end
+        callback(TextBox.Text)
     end)
 end
 
-createToggle(tab1Page, "ESP (Роли игроков)", getgenv().espEnabled, function(state) getgenv().espEnabled = state end)
-createToggle(tab1Page, "Aimbot для Шерифа (На Мардера)", getgenv().aimbotEnabled, function(state) getgenv().aimbotEnabled = state end)
-createToggle(tab1Page, "Aimbot для Мардера (На ближайшую цель)", getgenv().murdererAimbotEnabled, function(state) getgenv().murdererAimbotEnabled = state end)
+createToggle(tab1Page, "Chams ESP (Модельки игроков)", getgenv().espEnabled, function(state) getgenv().espEnabled = state end)
+createToggle(tab1Page, "Аимбот на Мардера (для Шерифа)", getgenv().sheriffAimbotEnabled, function(state) getgenv().sheriffAimbotEnabled = state end)
+createToggle(tab1Page, "Выстрелы через стены (Wallbang)", getgenv().sheriffWallbangEnabled, function(state) getgenv().sheriffWallbangEnabled = state end)
+createToggle(tab1Page, "Трейсеры пуль (Bullet Tracers)", getgenv().bulletTracersEnabled, function(state) getgenv().bulletTracersEnabled = state end)
 createToggle(tab1Page, "Убить всех (Авто-телепорт для Мардера)", getgenv().killAllMurdererEnabled, function(state) getgenv().killAllMurdererEnabled = state end)
 createToggle(tab1Page, "Flight (Полет по камере)", getgenv().flightEnabled, function(state)
     getgenv().flightEnabled = state
     if MobileFlightGui then MobileFlightGui.Enabled = state end
 end)
 createToggle(tab1Page, "Infinite Jump", getgenv().infiniteJumpEnabled, function(state) getgenv().infiniteJumpEnabled = state end)
+createToggle(tab1Page, "Bunny Hop (Автопрыжок)", getgenv().bhopEnabled, function(state) getgenv().bhopEnabled = state end)
+createSpeedInput(tab1Page, "Скорость Bunny Hop", getgenv().bhopSpeed, function(val) getgenv().bhopSpeed = tonumber(val) or 24 end)
 createToggle(tab1Page, "Noclip", getgenv().noclipEnabled, function(state) 
     getgenv().noclipEnabled = state 
     if not state and LocalPlayer.Character then
@@ -295,15 +308,129 @@ end)
 createToggle(tab1Page, "Spinbot (Крутиться)", getgenv().spinbotEnabled, function(state) getgenv().spinbotEnabled = state end)
 createToggle(tab1Page, "Свим-Флай (Плавание с полетом)", getgenv().swimWalkEnabled, function(state) getgenv().swimWalkEnabled = state end)
 createToggle(tab1Page, "Спидхак (Ходьба)", getgenv().walkSpeedEnabled, function(state) getgenv().walkSpeedEnabled = state end)
-createSpeedInput(tab1Page, "Скорость ходьбы", getgenv().walkSpeedValue, function(val) getgenv().walkSpeedValue = val end)
+createSpeedInput(tab1Page, "Скорость ходьбы", getgenv().walkSpeedValue, function(val) getgenv().walkSpeedValue = tonumber(val) or 24 end)
 
 createToggle(tab2Page, "Auto Coin Farm", getgenv().autoFarmEnabled, function(state) getgenv().autoFarmEnabled = state end)
-createSpeedInput(tab2Page, "Скорость Фарма", getgenv().customSpeed, function(val) getgenv().customSpeed = val end)
+createSpeedInput(tab2Page, "Скорость Фарма", getgenv().customSpeed, function(val) getgenv().customSpeed = tonumber(val) or 32 end)
 createToggle(tab2Page, "ТП к упавшему пистолету", getgenv().tpGunEnabled, function(state) getgenv().tpGunEnabled = state end)
 createToggle(tab2Page, "Fling Murderer", getgenv().flingMurdererEnabled, function(state) getgenv().flingMurdererEnabled = state end)
 createToggle(tab2Page, "Fling Sheriff", getgenv().flingSheriffEnabled, function(state) getgenv().flingSheriffEnabled = state end)
 
--- Динамический список игроков для выбора цели под Флинг
+-- Skin Changer tab content setup
+createToggle(tab4Page, "Включить Визуальный Скинченджер", getgenv().skinChangerActive, function(state) 
+    getgenv().skinChangerActive = state 
+end)
+
+createSpeedInput(tab4Page, "Texture ID Ножа (например rbxassetid://...)", getgenv().selectedKnifeMesh, function(val) getgenv().selectedKnifeMesh = val end)
+createSpeedInput(tab4Page, "Texture ID Пистолета (например rbxassetid://...)", getgenv().selectedGunMesh, function(val) getgenv().selectedGunMesh = val end)
+
+-- Bullet Tracers Visual Effect Logic
+local function createTracerBeam(startPos, endPos)
+    if not getgenv().bulletTracersEnabled then return end
+    pcall(function()
+        local part = Instance.new("Part")
+        part.Name = "BulletTracer"
+        part.Anchored = true
+        part.CanCollide = false
+        part.Material = Enum.Material.Neon
+        part.Color = Color3.fromRGB(60, 140, 255)
+        part.Transparency = 0.2
+        
+        local distance = (startPos - endPos).Magnitude
+        part.Size = Vector3.new(0.1, 0.1, distance)
+        part.CFrame = CFrame.new(startPos, endPos) * CFrame.new(0, 0, -distance / 2)
+        part.Parent = workspace
+        
+        TweenService:Create(part, TweenInfo.new(0.4), {Transparency = 1, Size = Vector3.new(0, 0, distance)}):Play()
+        task.delay(0.4, function()
+            if part and part.Parent then part:Destroy() end
+        end)
+    end)
+end
+
+-- Отслеживание стрельбы в MM2 (появление пули / выстрела)
+workspace.ChildAdded:Connect(function(child)
+    if child.Name == "GunShot" or child.Name == "Bullet" or child.Name == "Beam" then
+        if child:IsA("BasePart") then
+            createTracerBeam(Camera.CFrame.Position, child.Position)
+        end
+    end
+end)
+
+-- Перехват звуков выстрела или срабатывания оружия для красивых трейсеров
+for _, player in ipairs(Players:GetPlayers()) do
+    player.CharacterAdded:Connect(function(char)
+        char.ChildAdded:Connect(function(tool)
+            if tool:IsA("Tool") and (tool.Name == "Gun" or tool.Name == "Revolver" or tool.Name == "CGun") then
+                tool.Activated:Connect(function()
+                    if getgenv().bulletTracersEnabled and char:FindFirstChild("HumanoidRootPart") then
+                        local hrp = char.HumanoidRootPart
+                        createTracerBeam(hrp.Position, hrp.Position + hrp.CFrame.LookVector * 100)
+                    end
+                end)
+            end
+        end)
+    end)
+end
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(char)
+        char.ChildAdded:Connect(function(tool)
+            if tool:IsA("Tool") and (tool.Name == "Gun" or tool.Name == "Revolver" or tool.Name == "CGun") then
+                tool.Activated:Connect(function()
+                    if getgenv().bulletTracersEnabled and char:FindFirstChild("HumanoidRootPart") then
+                        local hrp = char.HumanoidRootPart
+                        createTracerBeam(hrp.Position, hrp.Position + hrp.CFrame.LookVector * 100)
+                    end
+                end)
+            end
+        end)
+    end)
+end)
+
+-- Логика визуального перехвата оружия в руках (Skin Changer)
+RunService.RenderStepped:Connect(function()
+    if not getgenv().skinChangerActive then return end
+    local char = LocalPlayer.Character
+    if not char then return end
+    
+    pcall(function()
+        local knife = char:FindFirstChild("Knife") or char:FindFirstChild("CKnife")
+        if knife and getgenv().selectedKnifeMesh ~= "" then
+            for _, desc in ipairs(knife:GetDescendants()) do
+                if desc:IsA("SpecialMesh") or desc:IsA("FileMesh") then
+                    if not desc:GetAttribute("OriginalTexture") then
+                        desc:SetAttribute("OriginalTexture", desc.TextureId)
+                    end
+                    desc.TextureId = getgenv().selectedKnifeMesh
+                elseif desc:IsA("MeshPart") then
+                    if not desc:GetAttribute("OriginalTextureID") then
+                        desc:SetAttribute("OriginalTextureID", desc.TextureID)
+                    end
+                    desc.TextureID = getgenv().selectedKnifeMesh
+                end
+            end
+        end
+
+        local gun = char:FindFirstChild("Gun") or char:FindFirstChild("Revolver") or char:FindFirstChild("CGun")
+        if gun and getgenv().selectedGunMesh ~= "" then
+            for _, desc in ipairs(gun:GetDescendants()) do
+                if desc:IsA("SpecialMesh") or desc:IsA("FileMesh") then
+                    if not desc:GetAttribute("OriginalTexture") then
+                        desc:SetAttribute("OriginalTexture", desc.TextureId)
+                    end
+                    desc.TextureId = getgenv().selectedGunMesh
+                elseif desc:IsA("MeshPart") then
+                    if not desc:GetAttribute("OriginalTextureID") then
+                        desc:SetAttribute("OriginalTextureID", desc.TextureID)
+                    end
+                    desc.TextureID = getgenv().selectedGunMesh
+                end
+            end
+        end
+    end)
+end)
+
 local TargetListContainer = Instance.new("ScrollingFrame")
 TargetListContainer.Size = UDim2.new(1, 0, 1, 0)
 TargetListContainer.BackgroundTransparency = 1
@@ -382,7 +509,7 @@ local function createDevLabel(devName)
     DevLabel.TextSize = 14
     DevLabel.Font = Enum.Font.GothamBold
     DevLabel.Text = devName
-    DevLabel.Parent = tab4Page
+    DevLabel.Parent = tab5Page
     local DevCorner = Instance.new("UICorner")
     DevCorner.CornerRadius = UDim.new(0, 6)
     DevCorner.Parent = DevLabel
@@ -435,6 +562,23 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
+-- Bunny Hop Logic
+RunService.Heartbeat:Connect(function()
+    if not getgenv().bhopEnabled then return end
+    local character = LocalPlayer.Character
+    if not character then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not rootPart then return end
+
+    if humanoid.MoveDirection.Magnitude > 0 then
+        if humanoid:GetState() == Enum.HumanoidStateType.Running or humanoid:GetState() == Enum.HumanoidStateType.RunningNoPhysics then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+        humanoid.WalkSpeed = getgenv().bhopSpeed or 24
+    end
+end)
+
 local function getPlayerRole(player)
     local char = player.Character
     if not char then return "Innocent" end
@@ -460,172 +604,113 @@ local function getPlayerRoleColor(player)
     else return Color3.fromRGB(60, 220, 100) end
 end
 
-local function createEsp(player)
-    if not Drawing then return end
-    local box = Drawing.new("Square")
-    box.Visible = false
-    box.Thickness = 1.5
-    box.Filled = false
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
-        if not getgenv().espEnabled or not box then
-            box.Visible = false
-            if not player or not player.Parent then box:Remove(); connection:Disconnect() end
-            return
-        end
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local rootPart = player.Character.HumanoidRootPart
-            local vector, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
-            if onScreen then
-                box.Color = getPlayerRoleColor(player)
-                box.Size = Vector2.new(2000 / vector.Z, 3000 / vector.Z)
-                box.Position = Vector2.new(vector.X - box.Size.X / 2, vector.Y - box.Size.Y / 2)
-                box.Visible = true
-            else
-                box.Visible = false
+local function createChams(player)
+    if player == LocalPlayer then return end
+
+    local function setupChams(char)
+        if char:FindFirstChild("MM2_ChamsFolder") then char.MM2_ChamsFolder:Destroy() end
+
+        local folder = Instance.new("Folder")
+        folder.Name = "MM2_ChamsFolder"
+        folder.Parent = char
+
+        local connection
+        connection = RunService.RenderStepped:Connect(function()
+            if not getgenv().espEnabled or not char or not char.Parent then
+                folder:ClearAllChildren()
+                if not char or not char.Parent then
+                    if connection then connection:Disconnect() end
+                end
+                return
             end
-        else
-            box.Visible = false
-        end
-    end)
+
+            local roleColor = getPlayerRoleColor(player)
+
+            for _, part in ipairs(char:GetChildren()) do
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                    local boxName = "Chams_" .. part.Name
+                    local highlightBox = folder:FindFirstChild(boxName)
+                    
+                    if not highlightBox then
+                        highlightBox = Instance.new("BoxHandleAdornment")
+                        highlightBox.Name = boxName
+                        highlightBox.Adornee = part
+                        highlightBox.AlwaysOnTop = true
+                        highlightBox.ZIndex = 5
+                        highlightBox.Size = part.Size + Vector3.new(0.05, 0.05, 0.05)
+                        highlightBox.Parent = folder
+                    end
+                    
+                    highlightBox.Color3 = roleColor
+                    highlightBox.Transparency = 0.4
+                end
+            end
+        end)
+    end
+
+    player.CharacterAdded:Connect(setupChams)
+    if player.Character then
+        task.spawn(function() setupChams(player.Character) end)
+    end
 end
 
 for _, player in ipairs(Players:GetPlayers()) do
-    if player ~= LocalPlayer then task.spawn(function() createEsp(player) end) end
+    if player ~= LocalPlayer then task.spawn(function() createChams(player) end) end
 end
 Players.PlayerAdded:Connect(function(player)
-    if player ~= LocalPlayer then task.spawn(function() createEsp(player) end) end
+    if player ~= LocalPlayer then task.spawn(function() createChams(player) end) end
 end)
 
--- Aimbot для Шерифа
 RunService.RenderStepped:Connect(function()
-    if getgenv().aimbotEnabled then
+    if not getgenv().sheriffAimbotEnabled then return end
+    if getPlayerRole(LocalPlayer) ~= "Sheriff" then return end
+
+    local char = LocalPlayer.Character
+    if not char then return end
+    local gun = char:FindFirstChild("Gun") or char:FindFirstChild("Revolver") or char:FindFirstChild("CGun")
+    if not gun then return end
+
+    local targetPlayer = nil
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and getPlayerRole(player) == "Murderer" then
+            local tChar = player.Character
+            if tChar and tChar:FindFirstChild("HumanoidRootPart") then
+                local hum = tChar:FindFirstChildOfClass("Humanoid")
+                if hum and hum.Health > 0 then
+                    targetPlayer = player
+                    break
+                end
+            end
+        end
+    end
+
+    if targetPlayer and targetPlayer.Character then
+        local targetPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart") or targetPlayer.Character:FindFirstChild("Head")
+        if targetPart then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
+        end
+    end
+end)
+
+-- Sheriff Wallbang Logic (Bypassing obstacles for gun raycast/remotes if applicable)
+RunService.Stepped:Connect(function()
+    if not getgenv().sheriffWallbangEnabled then return end
+    if getPlayerRole(LocalPlayer) ~= "Sheriff" then return end
+    
+    pcall(function()
         for _, player in ipairs(Players:GetPlayers()) do
             if player ~= LocalPlayer and getPlayerRole(player) == "Murderer" then
                 local char = player.Character
-                if char and (char:FindFirstChild("UpperTorso") or char:FindFirstChild("HumanoidRootPart")) then
-                    local targetPart = char:FindFirstChild("UpperTorso") or char.HumanoidRootPart
-                    local _, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
-                    if onScreen then
-                        local origin = Camera.CFrame.Position
-                        local direction = (targetPart.Position - origin)
-                        local raycastParams = RaycastParams.new()
-                        raycastParams.FilterType = RaycastParams.FilterType.Exclude
-                        raycastParams.FilterDescendantsInstances = {LocalPlayer.Character, char}
-                        
-                        local raycastResult = workspace:Raycast(origin, direction, raycastParams)
-                        if not raycastResult then
-                            local currentCFrame = Camera.CFrame
-                            Camera.CFrame = currentCFrame:Lerp(CFrame.new(currentCFrame.Position, targetPart.Position), 0.3)
-
-                            pcall(function()
-                                local backpack = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Backpack") or LocalPlayer:FindFirstChild("Backpack")
-                                local equippedGun = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Gun") or LocalPlayer.Character:FindFirstChild("Revolver"))
-                                
-                                if not equippedGun and backpack then
-                                    local gunItem = backpack:FindFirstChild("Gun") or backpack:FindFirstChild("Revolver")
-                                    if gunItem and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-                                        LocalPlayer.Character.Humanoid:EquipTool(gunItem)
-                                    end
-                                end
-
-                                equippedGun = LocalPlayer.Character and (LocalPlayer.Character:FindFirstChild("Gun") or LocalPlayer.Character:FindFirstChild("Revolver"))
-                                if equippedGun then
-                                    local shootRemote = equippedGun:FindFirstChild("Shoot") or equippedGun:FindFirstChild("Fire") or equippedGun:FindFirstChild("KnifeServer")
-                                    if not shootRemote then
-                                        for _, r in ipairs(equippedGun:GetDescendants()) do
-                                            if r:IsA("RemoteEvent") or r:IsA("RemoteFunction") then
-                                                shootRemote = r
-                                                break
-                                            end
-                                        end
-                                    end
-                                    if not shootRemote then
-                                        local re = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
-                                        if re then
-                                            shootRemote = re:FindFirstChild("Gameplay") and re.Gameplay:FindFirstChild("Shoot") or re:FindFirstChild("Shoot")
-                                        end
-                                    end
-
-                                    if shootRemote then
-                                        if shootRemote:IsA("RemoteEvent") then
-                                            shootRemote:FireServer(targetPart.Position)
-                                        elseif shootRemote:IsA("RemoteFunction") then
-                                            shootRemote:InvokeServer(targetPart.Position)
-                                        end
-                                    end
-                                end
-                            end)
-                        end
-                    end
-                end
-                break
-            end
-        end
-    end
-end)
-
--- Aimbot для Мардера
-RunService.RenderStepped:Connect(function()
-    if getgenv().murdererAimbotEnabled then
-        if getPlayerRole(LocalPlayer) == "Murderer" then
-            local closestTarget = nil
-            local shortestDist = math.huge
-            local myChar = LocalPlayer.Character
-            if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return end
-            local myRoot = myChar.HumanoidRootPart
-
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local hum = player.Character:FindFirstChildOfClass("Humanoid")
-                    if hum and hum.Health > 0 then
-                        local dist = (myRoot.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                        if dist < shortestDist then
-                            shortestDist = dist
-                            closestTarget = player.Character.HumanoidRootPart
+                if char then
+                    for _, part in ipairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
                         end
                     end
                 end
             end
-
-            if closestTarget then
-                local currentCFrame = Camera.CFrame
-                Camera.CFrame = currentCFrame:Lerp(CFrame.new(currentCFrame.Position, closestTarget.Position), 0.4)
-
-                pcall(function()
-                    local backpack = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Backpack") or LocalPlayer:FindFirstChild("Backpack")
-                    local equippedKnife = myChar:FindFirstChild("Knife") or myChar:FindFirstChild("CKnife")
-                    
-                    if not equippedKnife and backpack then
-                        local knifeItem = backpack:FindFirstChild("Knife") or backpack:FindFirstChild("CKnife")
-                        if knifeItem and myChar:FindFirstChildOfClass("Humanoid") then
-                            myChar.Humanoid:EquipTool(knifeItem)
-                        end
-                    end
-
-                    equippedKnife = myChar:FindFirstChild("Knife") or myChar:FindFirstChild("CKnife")
-                    if equippedKnife and shortestDist <= 15 then
-                        local stabRemote = equippedKnife:FindFirstChild("KnifeServer") or equippedKnife:FindFirstChild("Stab") or equippedKnife:FindFirstChild("RemoteEvent")
-                        if not stabRemote then
-                            for _, r in ipairs(equippedKnife:GetDescendants()) do
-                                if r:IsA("RemoteEvent") or r:IsA("RemoteFunction") then
-                                    stabRemote = r
-                                    break
-                                end
-                            end
-                        end
-                        if stabRemote then
-                            if stabRemote:IsA("RemoteEvent") then
-                                stabRemote:FireServer()
-                            elseif stabRemote:IsA("RemoteFunction") then
-                                stabRemote:InvokeServer()
-                            end
-                        end
-                    end
-                end)
-            end
         end
-    end
+    end)
 end)
 
 task.spawn(function()
@@ -666,12 +751,12 @@ task.spawn(function()
                                             end
                                         end
                                         if not stabRemote then
-                                            local re = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+                                            local re = ReplicatedStorage:FindFirstChild("Remotes")
                                             if re then
                                                 stabRemote = re:FindFirstChild("Gameplay") and re.Gameplay:FindFirstChild("Knife") or re:FindFirstChild("Stab")
                                             end
                                         end
-                                        
+                                    
                                         if stabRemote then
                                             if stabRemote:IsA("RemoteEvent") then
                                                 stabRemote:FireServer()
@@ -679,8 +764,8 @@ task.spawn(function()
                                                 stabRemote:InvokeServer()
                                             end
                                         end
+                                        task.wait(0.15)
                                     end
-                                    task.wait(0.15)
                                 end
                             end
                         end
@@ -734,7 +819,7 @@ RunService.RenderStepped:Connect(function()
         local character = LocalPlayer.Character
         if character and character:FindFirstChild("HumanoidRootPart") then
             local rootPart = character.HumanoidRootPart
-            rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(35), 0)
+            rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(45), 0)
         end
     end
 end)
@@ -824,7 +909,7 @@ RunService.Heartbeat:Connect(function()
     if not character then return end
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     if not humanoid then return end
-    if not getgenv().autoFarmEnabled then
+    if not getgenv().autoFarmEnabled and not getgenv().bhopEnabled then
         if getgenv().walkSpeedEnabled then
             humanoid.WalkSpeed = getgenv().walkSpeedValue or 24
         else
@@ -848,9 +933,9 @@ RunService.Stepped:Connect(function()
         end
         for _, desc in ipairs(workspace:GetDescendants()) do
             if desc.Name == "GunDrop" then
-                local targetPart = desc:IsA("Model") and desc.PrimaryPart or desc
-                if targetPart and targetPart:IsA("BasePart") then
-                    rootPart.CFrame = targetPart.CFrame + Vector3.new(0, 3, 0)
+                val = desc:IsA("Model") and desc.PrimaryPart or desc
+                if val and val:IsA("BasePart") then
+                    rootPart.CFrame = val.CFrame + Vector3.new(0, 3, 0)
                     break
                 end
             end
