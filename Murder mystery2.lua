@@ -1,5 +1,5 @@
 -- ==========================================================
--- MM2 Modern UI Script (Added Wallbang for Sheriff)
+-- MM2 Modern UI Script (Tracers Color Picker, Fixed Noclip, Touch Fling, Theme Customizer)
 -- ==========================================================
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
@@ -12,12 +12,12 @@ local Camera = workspace.CurrentCamera
 
 getgenv().espEnabled = getgenv().espEnabled or false
 getgenv().sheriffAimbotEnabled = getgenv().sheriffAimbotEnabled or false
-getgenv().sheriffWallbangEnabled = getgenv().sheriffWallbangEnabled or false
 getgenv().flightEnabled = getgenv().flightEnabled or false
 getgenv().killAllMurdererEnabled = getgenv().killAllMurdererEnabled or false
 getgenv().flingMurdererEnabled = getgenv().flingMurdererEnabled or false
 getgenv().flingSheriffEnabled = getgenv().flingSheriffEnabled or false
 getgenv().targetFlingEnabled = getgenv().targetFlingEnabled or false
+getgenv().touchFlingEnabled = getgenv().touchFlingEnabled or false
 getgenv().selectedTargetName = getgenv().selectedTargetName or ""
 getgenv().autoFarmEnabled = getgenv().autoFarmEnabled or false
 getgenv().noclipEnabled = getgenv().noclipEnabled or false
@@ -38,8 +38,13 @@ getgenv().skinChangerActive = getgenv().skinChangerActive or false
 getgenv().selectedKnifeMesh = getgenv().selectedKnifeMesh or ""
 getgenv().selectedGunMesh = getgenv().selectedGunMesh or ""
 
--- Bullet Tracers variable
+-- Bullet Tracers variables
 getgenv().bulletTracersEnabled = getgenv().bulletTracersEnabled or false
+getgenv().tracerColorType = getgenv().tracerColorType or "Синий"
+
+-- Theme Accent Customizer variables
+getgenv().uiAccentColor = getgenv().uiAccentColor or Color3.fromRGB(114, 137, 218)
+getgenv().btnAccentColor = getgenv().btnAccentColor or Color3.fromRGB(40, 40, 55)
 
 if CoreGui:FindFirstChild("MM2ModernPanel") then
     CoreGui.MM2ModernPanel:Destroy()
@@ -66,21 +71,21 @@ ToggleCorner.CornerRadius = UDim.new(0, 12)
 ToggleCorner.Parent = ToggleButton
 
 local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(114, 137, 218)
+ToggleStroke.Color = getgenv().uiAccentColor
 ToggleStroke.Thickness = 2
 ToggleStroke.Parent = ToggleButton
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 460, 0, 320)
-MainFrame.Position = UDim2.new(0.5, -230, 0.5, -160)
-MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+MainFrame.Size = UDim2.new(0, 480, 0, 340)
+MainFrame.Position = UDim2.new(0.5, -240, 0.5, -170)
+MainFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.CornerRadius = UDim.new(0, 12)
 MainCorner.Parent = MainFrame
 
 local MainStroke = Instance.new("UIStroke")
@@ -89,67 +94,68 @@ MainStroke.Thickness = 1.5
 MainStroke.Parent = MainFrame
 
 local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+Header.Size = UDim2.new(1, 0, 0, 45)
+Header.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
 Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 
 local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 10)
+HeaderCorner.CornerRadius = UDim.new(0, 12)
 HeaderCorner.Parent = Header
 
 local HeaderCover = Instance.new("Frame")
-HeaderCover.Size = UDim2.new(1, 0, 0, 10)
-HeaderCover.Position = UDim2.new(0, 0, 1, -10)
-HeaderCover.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+HeaderCover.Size = UDim2.new(1, 0, 0, 12)
+HeaderCover.Position = UDim2.new(0, 0, 1, -12)
+HeaderCover.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
 HeaderCover.BorderSizePixel = 0
 HeaderCover.Parent = Header
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 260, 1, 0)
+Title.Size = UDim2.new(0, 300, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
 Title.Font = Enum.Font.GothamBold
-Title.Text = "MM2 Hub <font color='#7289da'>v4.1 Wallbang</font>"
+Title.Text = "MM2 Hub <font color='#7289da'>v5.0 Ultimate</font>"
 Title.RichText = true
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(0, 120, 1, -45)
-TabContainer.Position = UDim2.new(0, 0, 0, 45)
-TabContainer.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+TabContainer.Size = UDim2.new(0, 130, 1, -50)
+TabContainer.Position = UDim2.new(0, 0, 0, 48)
+TabContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
 TabContainer.BorderSizePixel = 0
 TabContainer.Parent = MainFrame
 
 local TabListLayout = Instance.new("UIListLayout")
 TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabListLayout.Padding = UDim.new(0, 6)
+TabListLayout.Padding = UDim.new(0, 5)
 TabListLayout.Parent = TabContainer
 
 local TabPadding = Instance.new("UIPadding")
-TabPadding.PaddingTop = UDim.new(0, 10)
-TabPadding.PaddingLeft = UDim.new(0, 10)
-TabPadding.PaddingRight = UDim.new(0, 10)
+TabPadding.PaddingTop = UDim.new(0, 8)
+TabPadding.PaddingLeft = UDim.new(0, 8)
+TabPadding.PaddingRight = UDim.new(0, 8)
 TabPadding.Parent = TabContainer
 
 local PagesContainer = Instance.new("Frame")
-PagesContainer.Size = UDim2.new(1, -130, 1, -55)
-PagesContainer.Position = UDim2.new(0, 125, 0, 50)
+PagesContainer.Size = UDim2.new(1, -140, 1, -55)
+PagesContainer.Position = UDim2.new(0, 135, 0, 50)
 PagesContainer.BackgroundTransparency = 1
 PagesContainer.Parent = MainFrame
 
 local Tabs = {}
-local Pages = {}
+local registeredButtons = {}
+local registeredToggles = {}
 
 local function createTab(name, order)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, 0, 0, 28)
-    TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+    TabButton.Size = UDim2.new(1, 0, 0, 30)
+    TabButton.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
     TabButton.TextColor3 = Color3.fromRGB(160, 160, 180)
-    TabButton.TextSize = 11
+    TabButton.TextSize = 12
     TabButton.Font = Enum.Font.GothamSemibold
     TabButton.Text = name
     TabButton.LayoutOrder = order
@@ -182,6 +188,7 @@ local function createTab(name, order)
     end)
 
     table.insert(Tabs, {Button = TabButton, Page = Page})
+    table.insert(registeredButtons, TabButton)
     return TabButton, Page
 end
 
@@ -189,16 +196,46 @@ local tab1Btn, tab1Page = createTab("Главная", 1)
 local tab2Btn, tab2Page = createTab("Фарм & ТП", 2)
 local tab3Btn, tab3Page = createTab("Игроки", 3)
 local tab4Btn, tab4Page = createTab("Скинченджер", 4)
-local tab5Btn, tab5Page = createTab("Авторы", 5)
+local tab5Btn, tab5Page = createTab("Тема гуи", 5)
+local tab6Btn, tab6Page = createTab("Авторы", 6)
+
+local function updateThemeColors()
+    ToggleStroke.Color = getgenv().uiAccentColor
+    for _, btn in ipairs(registeredButtons) do
+        -- Check if it's currently selected tab button
+        local isSelected = false
+        for _, t in ipairs(Tabs) do
+            if t.Button == btn and t.Page.Visible then
+                isSelected = true
+                break
+            end
+        end
+        if isSelected then
+            btn.BackgroundColor3 = getgenv().uiAccentColor
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+            btn.TextColor3 = Color3.fromRGB(160, 160, 180)
+        end
+    end
+    for _, item in ipairs(registeredToggles) do
+        if item.IsActive() then
+            item.Indicator.BackgroundColor3 = getgenv().uiAccentColor
+        else
+            item.Indicator.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        end
+        item.Frame.BackgroundColor3 = getgenv().btnAccentColor
+    end
+end
 
 local function switchTab(selectedTab)
     for _, tab in ipairs(Tabs) do
         if tab.Page == selectedTab then
             tab.Page.Visible = true
-            TweenService:Create(tab.Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(114, 137, 218), TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+            TweenService:Create(tab.Button, TweenInfo.new(0.2), {BackgroundColor3 = getgenv().uiAccentColor, TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
         else
             tab.Page.Visible = false
-            TweenService:Create(tab.Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 42), TextColor3 = Color3.fromRGB(160, 160, 180)}):Play()
+            TweenService:Create(tab.Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(28, 28, 38), TextColor3 = Color3.fromRGB(160, 160, 180)}):Play()
         end
     end
 end
@@ -208,12 +245,13 @@ tab2Btn.MouseButton1Click:Connect(function() switchTab(tab2Page) end)
 tab3Btn.MouseButton1Click:Connect(function() switchTab(tab3Page) end)
 tab4Btn.MouseButton1Click:Connect(function() switchTab(tab4Page) end)
 tab5Btn.MouseButton1Click:Connect(function() switchTab(tab5Page) end)
+tab6Btn.MouseButton1Click:Connect(function() switchTab(tab6Page) end)
 switchTab(tab1Page)
 
 local function createToggle(parent, text, initialState, callback)
     local Button = Instance.new("TextButton")
     Button.Size = UDim2.new(1, 0, 0, 36)
-    Button.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
+    Button.BackgroundColor3 = getgenv().btnAccentColor
     Button.TextColor3 = Color3.fromRGB(220, 220, 240)
     Button.TextSize = 13
     Button.Font = Enum.Font.GothamMedium
@@ -225,20 +263,26 @@ local function createToggle(parent, text, initialState, callback)
     Corner.CornerRadius = UDim.new(0, 6)
     Corner.Parent = Button
 
+    local state = initialState
     local Indicator = Instance.new("Frame")
     Indicator.Size = UDim2.new(0, 12, 0, 12)
     Indicator.Position = UDim2.new(1, -24, 0.5, -6)
-    Indicator.BackgroundColor3 = initialState and Color3.fromRGB(50, 200, 100) or Color3.fromRGB(200, 60, 60)
+    Indicator.BackgroundColor3 = state and getgenv().uiAccentColor or Color3.fromRGB(200, 60, 60)
     Indicator.Parent = Button
 
     local IndCorner = Instance.new("UICorner")
     IndCorner.CornerRadius = UDim.new(1, 0)
     IndCorner.Parent = Indicator
 
-    local state = initialState
+    table.insert(registeredToggles, {
+        Frame = Button,
+        Indicator = Indicator,
+        IsActive = function() return state end
+    })
+
     Button.MouseButton1Click:Connect(function()
         state = not state
-        Indicator.BackgroundColor3 = state and Color3.fromRGB(50, 200, 100) or Color3.fromRGB(200, 60, 60)
+        Indicator.BackgroundColor3 = state and getgenv().uiAccentColor or Color3.fromRGB(200, 60, 60)
         callback(state)
     end)
 
@@ -248,8 +292,9 @@ end
 local function createSpeedInput(parent, text, defaultVal, callback)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, 0, 0, 46)
-    Frame.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
+    Frame.BackgroundColor3 = getgenv().btnAccentColor
     Frame.Parent = parent
+    table.insert(registeredToggles, {Frame = Frame, Indicator = {BackgroundColor3 = Color3.new()}, IsActive = function() return false end})
 
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
@@ -285,10 +330,60 @@ local function createSpeedInput(parent, text, defaultVal, callback)
     end)
 end
 
+local function createDropdown(parent, text, options, currentOption, callback)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, 0, 0, 46)
+    Frame.BackgroundColor3 = getgenv().btnAccentColor
+    Frame.Parent = parent
+    table.insert(registeredToggles, {Frame = Frame, Indicator = {BackgroundColor3 = Color3.new()}, IsActive = function() return false end})
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = Frame
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(0.5, 0, 1, 0)
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.TextColor3 = Color3.fromRGB(220, 220, 240)
+    Label.TextSize = 12
+    Label.Font = Enum.Font.GothamMedium
+    Label.Text = text
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = Frame
+
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0.4, 0, 0, 26)
+    Button.Position = UDim2.new(0.57, 0, 0.5, -13)
+    Button.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 11
+    Button.Font = Enum.Font.GothamBold
+    Button.Text = currentOption
+    Button.Parent = Frame
+
+    local BoxCorner = Instance.new("UICorner")
+    BoxCorner.CornerRadius = UDim.new(0, 4)
+    BoxCorner.Parent = Button
+
+    local idx = 1
+    for i, opt in ipairs(options) do
+        if opt == currentOption then idx = i break end
+    end
+
+    Button.MouseButton1Click:Connect(function()
+        idx = idx + 1
+        if idx > #options then idx = 1 end
+        local chosen = options[idx]
+        Button.Text = chosen
+        callback(chosen)
+    end)
+end
+
 createToggle(tab1Page, "Chams ESP (Модельки игроков)", getgenv().espEnabled, function(state) getgenv().espEnabled = state end)
 createToggle(tab1Page, "Аимбот на Мардера (для Шерифа)", getgenv().sheriffAimbotEnabled, function(state) getgenv().sheriffAimbotEnabled = state end)
-createToggle(tab1Page, "Выстрелы через стены (Wallbang)", getgenv().sheriffWallbangEnabled, function(state) getgenv().sheriffWallbangEnabled = state end)
 createToggle(tab1Page, "Трейсеры пуль (Bullet Tracers)", getgenv().bulletTracersEnabled, function(state) getgenv().bulletTracersEnabled = state end)
+createDropdown(tab1Page, "Цвет Трейсеров Пуль", {"Синий", "Красный", "Зеленый", "Радужный"}, getgenv().tracerColorType, function(val) getgenv().tracerColorType = val end)
 createToggle(tab1Page, "Убить всех (Авто-телепорт для Мардера)", getgenv().killAllMurdererEnabled, function(state) getgenv().killAllMurdererEnabled = state end)
 createToggle(tab1Page, "Flight (Полет по камере)", getgenv().flightEnabled, function(state)
     getgenv().flightEnabled = state
@@ -299,12 +394,8 @@ createToggle(tab1Page, "Bunny Hop (Автопрыжок)", getgenv().bhopEnabled
 createSpeedInput(tab1Page, "Скорость Bunny Hop", getgenv().bhopSpeed, function(val) getgenv().bhopSpeed = tonumber(val) or 24 end)
 createToggle(tab1Page, "Noclip", getgenv().noclipEnabled, function(state) 
     getgenv().noclipEnabled = state 
-    if not state and LocalPlayer.Character then
-        for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = true end
-        end
-    end
 end)
+createToggle(tab1Page, "Touch Fling (Флинг при касании)", getgenv().touchFlingEnabled, function(state) getgenv().touchFlingEnabled = state end)
 createToggle(tab1Page, "Spinbot (Крутиться)", getgenv().spinbotEnabled, function(state) getgenv().spinbotEnabled = state end)
 createToggle(tab1Page, "Свим-Флай (Плавание с полетом)", getgenv().swimWalkEnabled, function(state) getgenv().swimWalkEnabled = state end)
 createToggle(tab1Page, "Спидхак (Ходьба)", getgenv().walkSpeedEnabled, function(state) getgenv().walkSpeedEnabled = state end)
@@ -316,79 +407,119 @@ createToggle(tab2Page, "ТП к упавшему пистолету", getgenv().
 createToggle(tab2Page, "Fling Murderer", getgenv().flingMurdererEnabled, function(state) getgenv().flingMurdererEnabled = state end)
 createToggle(tab2Page, "Fling Sheriff", getgenv().flingSheriffEnabled, function(state) getgenv().flingSheriffEnabled = state end)
 
--- Skin Changer tab content setup
 createToggle(tab4Page, "Включить Визуальный Скинченджер", getgenv().skinChangerActive, function(state) 
     getgenv().skinChangerActive = state 
 end)
+createSpeedInput(tab4Page, "Texture ID Ножа", getgenv().selectedKnifeMesh, function(val) getgenv().selectedKnifeMesh = val end)
+createSpeedInput(tab4Page, "Texture ID Пистолета", getgenv().selectedGunMesh, function(val) getgenv().selectedGunMesh = val end)
 
-createSpeedInput(tab4Page, "Texture ID Ножа (например rbxassetid://...)", getgenv().selectedKnifeMesh, function(val) getgenv().selectedKnifeMesh = val end)
-createSpeedInput(tab4Page, "Texture ID Пистолета (например rbxassetid://...)", getgenv().selectedGunMesh, function(val) getgenv().selectedGunMesh = val end)
+-- TAB 5: THEME CUSTOMIZER (Выбор цвета ГУИ и кнопок)
+local function createThemeColorButton(parent, text, accentColor, btnColor)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(1, 0, 0, 38)
+    Btn.BackgroundColor3 = btnColor
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.TextSize = 13
+    Btn.Font = Enum.Font.GothamBold
+    Btn.Text = text
+    Btn.Parent = parent
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
 
--- Bullet Tracers Visual Effect Logic
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = accentColor
+    stroke.Thickness = 1.5
+    stroke.Parent = Btn
+
+    Btn.MouseButton1Click:Connect(function()
+        getgenv().uiAccentColor = accentColor
+        getgenv().btnAccentColor = btnColor
+        updateThemeColors()
+    end)
+end
+
+createThemeColorButton(tab5Page, "🌙 Классический Синий (Discord)", Color3.fromRGB(114, 137, 218), Color3.fromRGB(26, 26, 36))
+createThemeColorButton(tab5Page, "🔥 Киберпанк (Неоновый Красный)", Color3.fromRGB(255, 50, 50), Color3.fromRGB(32, 20, 24))
+createThemeColorButton(tab5Page, "🌿 Изумрудный (Зеленый Акцент)", Color3.fromRGB(50, 220, 120), Color3.fromRGB(20, 30, 24))
+createThemeColorButton(tab5Page, "⚡ Фиолетовый Неон (Dark Purple)", Color3.fromRGB(170, 60, 255), Color3.fromRGB(28, 20, 36))
+createThemeColorButton(tab5Page, "☀️ Золотой / Желтый Люкс", Color3.fromRGB(255, 200, 50), Color3.fromRGB(32, 28, 20))
+
+-- Bullet Tracers Color logic
+local function getTracerColor()
+    local cType = getgenv().tracerColorType
+    if cType == "Красный" then
+        return Color3.fromRGB(255, 50, 50)
+    elseif cType == "Зеленый" then
+        return Color3.fromRGB(50, 255, 50)
+    elseif cType == "Радужный" then
+        return Color3.fromHSV(tick() % 5 / 5, 1, 1)
+    else
+        return Color3.fromRGB(60, 160, 255)
+    end
+end
+
 local function createTracerBeam(startPos, endPos)
     if not getgenv().bulletTracersEnabled then return end
     pcall(function()
         local part = Instance.new("Part")
-        part.Name = "BulletTracer"
+        part.Name = "BulletTracerLine"
         part.Anchored = true
         part.CanCollide = false
         part.Material = Enum.Material.Neon
-        part.Color = Color3.fromRGB(60, 140, 255)
-        part.Transparency = 0.2
+        part.Color = getTracerColor()
+        part.Transparency = 0.1
         
         local distance = (startPos - endPos).Magnitude
-        part.Size = Vector3.new(0.1, 0.1, distance)
+        part.Size = Vector3.new(0.12, 0.12, distance)
         part.CFrame = CFrame.new(startPos, endPos) * CFrame.new(0, 0, -distance / 2)
         part.Parent = workspace
         
-        TweenService:Create(part, TweenInfo.new(0.4), {Transparency = 1, Size = Vector3.new(0, 0, distance)}):Play()
-        task.delay(0.4, function()
+        TweenService:Create(part, TweenInfo.new(0.35), {Transparency = 1, Size = Vector3.new(0, 0, distance)}):Play()
+        task.delay(0.35, function()
             if part and part.Parent then part:Destroy() end
         end)
     end)
 end
 
--- Отслеживание стрельбы в MM2 (появление пули / выстрела)
-workspace.ChildAdded:Connect(function(child)
-    if child.Name == "GunShot" or child.Name == "Bullet" or child.Name == "Beam" then
-        if child:IsA("BasePart") then
-            createTracerBeam(Camera.CFrame.Position, child.Position)
+local function monitorCharacterGun(char)
+    char.ChildAdded:Connect(function(tool)
+        if tool:IsA("Tool") and (tool.Name == "Gun" or tool.Name == "Revolver" or tool.Name == "CGun") then
+            tool.Activated:Connect(function()
+                if getgenv().bulletTracersEnabled and char:FindFirstChild("HumanoidRootPart") then
+                    local hrp = char.HumanoidRootPart
+                    local origin = hrp.Position
+                    local targetPos = origin + (Camera.CFrame.LookVector * 300)
+                    
+                    local raycastParams = RaycastParams.new()
+                    raycastParams.FilterDescendantsInstances = {char, Camera}
+                    raycastParams.FilterType = RaycastFilterType.Exclude
+                    local result = workspace:Raycast(origin, Camera.CFrame.LookVector * 300, raycastParams)
+                    if result then
+                        targetPos = result.Position
+                    end
+                    
+                    createTracerBeam(origin, targetPos)
+                end
+            end)
         end
-    end
-end)
+    end)
+end
 
--- Перехват звуков выстрела или срабатывания оружия для красивых трейсеров
+LocalPlayer.CharacterAdded:Connect(monitorCharacterGun)
+if LocalPlayer.Character then task.spawn(function() monitorCharacterGun(LocalPlayer.Character) end) end
+
 for _, player in ipairs(Players:GetPlayers()) do
     player.CharacterAdded:Connect(function(char)
-        char.ChildAdded:Connect(function(tool)
-            if tool:IsA("Tool") and (tool.Name == "Gun" or tool.Name == "Revolver" or tool.Name == "CGun") then
-                tool.Activated:Connect(function()
-                    if getgenv().bulletTracersEnabled and char:FindFirstChild("HumanoidRootPart") then
-                        local hrp = char.HumanoidRootPart
-                        createTracerBeam(hrp.Position, hrp.Position + hrp.CFrame.LookVector * 100)
-                    end
-                end)
-            end
-        end)
+        monitorCharacterGun(char)
     end)
+    if player.Character then task.spawn(function() monitorCharacterGun(player.Character) end) end
 end
 
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(char)
-        char.ChildAdded:Connect(function(tool)
-            if tool:IsA("Tool") and (tool.Name == "Gun" or tool.Name == "Revolver" or tool.Name == "CGun") then
-                tool.Activated:Connect(function()
-                    if getgenv().bulletTracersEnabled and char:FindFirstChild("HumanoidRootPart") then
-                        local hrp = char.HumanoidRootPart
-                        createTracerBeam(hrp.Position, hrp.Position + hrp.CFrame.LookVector * 100)
-                    end
-                end)
-            end
-        end)
+        monitorCharacterGun(char)
     end)
 end)
 
--- Логика визуального перехвата оружия в руках (Skin Changer)
 RunService.RenderStepped:Connect(function()
     if not getgenv().skinChangerActive then return end
     local char = LocalPlayer.Character
@@ -457,9 +588,10 @@ local function refreshPlayerList()
         if player ~= LocalPlayer then
             local pFrame = Instance.new("Frame")
             pFrame.Size = UDim2.new(1, 0, 0, 42)
-            pFrame.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
+            pFrame.BackgroundColor3 = getgenv().btnAccentColor
             pFrame.Parent = TargetListContainer
             Instance.new("UICorner", pFrame).CornerRadius = UDim.new(0, 6)
+            table.insert(registeredToggles, {Frame = pFrame, Indicator = {BackgroundColor3 = Color3.new()}, IsActive = function() return false end})
 
             local pLabel = Instance.new("TextLabel")
             pLabel.Size = UDim2.new(0.5, 0, 1, 0)
@@ -475,7 +607,7 @@ local function refreshPlayerList()
             local pFlingBtn = Instance.new("TextButton")
             pFlingBtn.Size = UDim2.new(0, 100, 0, 28)
             pFlingBtn.Position = UDim2.new(1, -110, 0.5, -14)
-            pFlingBtn.BackgroundColor3 = getgenv().selectedTargetName == player.Name and Color3.fromRGB(50, 200, 100) or Color3.fromRGB(114, 137, 218)
+            pFlingBtn.BackgroundColor3 = getgenv().selectedTargetName == player.Name and Color3.fromRGB(50, 200, 100) or getgenv().uiAccentColor
             pFlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
             pFlingBtn.TextSize = 12
             pFlingBtn.Font = Enum.Font.GothamBold
@@ -501,21 +633,29 @@ Players.PlayerAdded:Connect(refreshPlayerList)
 Players.PlayerRemoving:Connect(refreshPlayerList)
 task.spawn(refreshPlayerList)
 
-local function createDevLabel(devName)
-    local DevLabel = Instance.new("TextLabel")
-    DevLabel.Size = UDim2.new(1, 0, 0, 40)
-    DevLabel.BackgroundColor3 = Color3.fromRGB(26, 26, 36)
-    DevLabel.TextColor3 = Color3.fromRGB(114, 137, 218)
-    DevLabel.TextSize = 14
-    DevLabel.Font = Enum.Font.GothamBold
-    DevLabel.Text = devName
-    DevLabel.Parent = tab5Page
-    local DevCorner = Instance.new("UICorner")
-    DevCorner.CornerRadius = UDim.new(0, 6)
-    DevCorner.Parent = DevLabel
+local function createVerifiedAuthor(parent, nameText)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, 0, 0, 42)
+    Frame.BackgroundColor3 = getgenv().btnAccentColor
+    Frame.Parent = parent
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    table.insert(registeredToggles, {Frame = Frame, Indicator = {BackgroundColor3 = Color3.new()}, IsActive = function() return false end})
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -20, 1, 0)
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.TextColor3 = Color3.fromRGB(220, 220, 240)
+    Label.TextSize = 13
+    Label.Font = Enum.Font.GothamMedium
+    Label.Text = nameText .. " <font color='#1da1f2'>🅲</font>"
+    Label.RichText = true
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = Frame
 end
-createDevLabel("sanonaprivate")
-createDevLabel("Darynlox32")
+
+createVerifiedAuthor(tab6Page, "sanonaprivate")
+createVerifiedAuthor(tab6Page, "Darynlox32")
 
 ToggleButton.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 
@@ -562,7 +702,6 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- Bunny Hop Logic
 RunService.Heartbeat:Connect(function()
     if not getgenv().bhopEnabled then return end
     local character = LocalPlayer.Character
@@ -690,27 +829,6 @@ RunService.RenderStepped:Connect(function()
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
         end
     end
-end)
-
--- Sheriff Wallbang Logic (Bypassing obstacles for gun raycast/remotes if applicable)
-RunService.Stepped:Connect(function()
-    if not getgenv().sheriffWallbangEnabled then return end
-    if getPlayerRole(LocalPlayer) ~= "Sheriff" then return end
-    
-    pcall(function()
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and getPlayerRole(player) == "Murderer" then
-                local char = player.Character
-                if char then
-                    for _, part in ipairs(char:GetDescendants()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
-                        end
-                    end
-                end
-            end
-        end
-    end)
 end)
 
 task.spawn(function()
@@ -888,10 +1006,33 @@ local function runTargetFling()
     end
 end
 
+local function runTouchFling()
+    if not getgenv().touchFlingEnabled then return end
+    local localChar = LocalPlayer.Character
+    if not localChar or not localChar:FindFirstChild("HumanoidRootPart") or not localChar:FindFirstChildOfClass("Humanoid") then return end
+    local myRoot = localChar.HumanoidRootPart
+    local humanoid = localChar:FindFirstChildOfClass("Humanoid")
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local tRoot = player.Character.HumanoidRootPart
+            local dist = (myRoot.Position - tRoot.Position).Magnitude
+            if dist < 6 then
+                humanoid.PlatformStand = true
+                myRoot.CFrame = tRoot.CFrame + Vector3.new(math.random(-2, 2), math.random(1, 3), math.random(-2, 2))
+                myRoot.AssemblyLinearVelocity = Vector3.new(99999, 99999, 99999)
+                myRoot.AssemblyAngularVelocity = Vector3.new(99999, 99999, 99999)
+                break
+            end
+        end
+    end
+end
+
 RunService.Heartbeat:Connect(function()
     if getgenv().flingMurdererEnabled then runFling("Murderer") end
     if getgenv().flingSheriffEnabled then runFling("Sheriff") end
     if getgenv().targetFlingEnabled then runTargetFling() end
+    if getgenv().touchFlingEnabled then runTouchFling() end
 end)
 
 RunService.Stepped:Connect(function()
@@ -899,7 +1040,18 @@ RunService.Stepped:Connect(function()
     if not character then return end
     if getgenv().noclipEnabled then
         for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
+            if part:IsA("BasePart") then
+                if not part:GetAttribute("OriginalCanCollide") then
+                    part:SetAttribute("OriginalCanCollide", part.CanCollide)
+                end
+                part.CanCollide = false
+            end
+        end
+    else
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part:GetAttribute("OriginalCanCollide") ~= nil then
+                part.CanCollide = part:GetAttribute("OriginalCanCollide")
+            end
         end
     end
 end)
